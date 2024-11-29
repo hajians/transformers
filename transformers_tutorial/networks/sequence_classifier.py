@@ -1,6 +1,10 @@
 from torch import nn
 from transformers import AutoModel
 
+from transformers_tutorial.utils import get_logger
+
+logger = get_logger(__name__)
+
 
 class SequenceClassification(nn.Module):
 
@@ -27,10 +31,10 @@ class SequenceClassification(nn.Module):
                 out_features=self.n_classification_layer,
                 device=self.device,
             ),
-            # nn.Softmax(dim=1)
         )
 
     def set_logistic_regression(self):
+        logger.info("Setting LM weights to non-trainable.")
         for name, param in self.named_parameters():
             if param.requires_grad and "lm" in name:
                 param.requires_grad = False
@@ -43,7 +47,7 @@ class SequenceClassification(nn.Module):
             for k in inputs_.keys()
             if k in ["attention_mask", "input_ids"]
         }
-        # print(data)
+
         last_hidden_state = self.lm(**data).last_hidden_state[:, 0]
-        # print(last_hidden_state.shape)
+
         return self.classifier(last_hidden_state)
