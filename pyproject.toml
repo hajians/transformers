@@ -1,0 +1,23 @@
+[tool.poetry]
+name = "transformers_tutorial"
+version = "0.1.0"
+description = "A package for experimenting with deep learning methods and in particular with transformers"
+authors = ["Soheil <soheil.hajian@outlook.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+transformers = "^4.46.3"
+datasets = "^3.1.0"
+umap-learn = "^0.5.7"
+numba = "~0.56.0"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.3.2"
+pre-commit = "^3.8.0"
+black = {extras = ["jupyter"], version = "^24.8.0"}
+parameterized = "^0.9.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
