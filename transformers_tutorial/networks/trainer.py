@@ -43,6 +43,7 @@ class Trainer:
 
         batches_per_epochs = n_samples // batch_size
         validation_data_ = validation_data[:]
+        device_ = self.model.device
 
         for epoch in range(n_epochs):
             with tqdm.trange(batches_per_epochs, unit="batch", mininterval=0) as bar:
@@ -52,7 +53,7 @@ class Trainer:
                         k for k in range(batch * batch_size, (batch + 1) * batch_size)
                     ]
                     batch_data = train_data.select(indices_)[:]
-                    labels = batch_data[label_key]
+                    labels = batch_data[label_key].to(device_)
 
                     self.optimizer.zero_grad()
                     loss = self.loss(self.model(batch_data), labels)
@@ -61,7 +62,8 @@ class Trainer:
 
             with torch.no_grad():
                 loss_val = self.loss(
-                    self.model(validation_data_), validation_data_[label_key]
+                    self.model(validation_data_),
+                    validation_data_[label_key].to(device_),
                 )
                 logger.info(f"validation loss: {loss_val}")
 
