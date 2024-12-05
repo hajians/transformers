@@ -12,6 +12,7 @@ datasets = "^3.1.0"
 umap-learn = "^0.5.7"
 numba = "~0.57.0"
 matplotlib = "^3.9.3"
+bertviz = "^1.4.0"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.3.2"
