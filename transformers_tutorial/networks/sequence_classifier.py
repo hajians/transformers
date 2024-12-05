@@ -16,6 +16,10 @@ class SequenceClassification(nn.Module):
         self.device = device
 
         self.lm = AutoModel.from_pretrained(hf_language_model)
+
+        if self.device == "cuda":
+            self.lm = self.lm.cuda()
+
         self.transformer_output_dim = self.lm.transformer.layer[
             -1
         ].output_layer_norm.normalized_shape[0]
