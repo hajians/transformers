@@ -41,9 +41,11 @@ class Trainer:
                 f"Elements in the input data contain inconsistent rows: {all_n_samples}"
             )
 
+        device_ = self.model.device
+
         batches_per_epochs = n_samples // batch_size
         validation_data_ = validation_data[:]
-        device_ = self.model.device
+        validation_labels_ = validation_data_[label_key].to(device_)
 
         for epoch in range(n_epochs):
             with tqdm.trange(batches_per_epochs, unit="batch", mininterval=0) as bar:
@@ -63,7 +65,7 @@ class Trainer:
             with torch.no_grad():
                 loss_val = self.loss(
                     self.model(validation_data_),
-                    validation_data_[label_key].to(device_),
+                    validation_labels_,
                 )
                 logger.info(f"validation loss: {loss_val}")
 
