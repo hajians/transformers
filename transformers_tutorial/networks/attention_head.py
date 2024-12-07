@@ -42,3 +42,28 @@ class AttentionHead(nn.Module):
             self.v(hidden_state),
             attention_mask=attention_masks,
         )
+
+
+class MultiHeadAttention(nn.Module):
+    def __init__(self, emb_dim, hidden_dim, n_heads):
+        super().__init__()
+        self.emb_dim = emb_dim
+        self.hidden_dim = hidden_dim
+        self.n_heads = n_heads
+
+        self.hidden_dim_per_head = self.hidden_dim // self.n_heads
+
+        self.heads = nn.ModuleList(
+            [
+                AttentionHead(self.emb_dim, self.hidden_dim_per_head)
+                for _ in range(n_heads)
+            ]
+        )
+
+        self.dense = nn.Linear(self.hidden_dim, self.hidden_dim)
+
+    def forward(self, hidden_state, attention_masks=None):
+        output_att = torch.cat(
+            [head(hidden_state, attention_masks) for head in self.heads], dim=-1
+        )
+        return self.dense(output_att)

@@ -3,7 +3,10 @@ import unittest
 import numpy as np
 import torch
 
-from transformers_tutorial.networks.attention_head import AttentionHead
+from transformers_tutorial.networks.attention_head import (
+    AttentionHead,
+    MultiHeadAttention,
+)
 
 
 class TestAttentionHead(unittest.TestCase):
@@ -68,3 +71,37 @@ class TestAttentionHead(unittest.TestCase):
 
         # Ensure output is a valid tensor
         self.assertTrue(torch.is_tensor(output))
+
+
+class TestMultiHeadAttention(unittest.TestCase):
+    def setUp(self):
+        # Define parameters for the MultiHeadAttention
+        self.emb_dim = 32
+        self.hidden_dim = 16
+        self.n_heads = 4
+        self.seq_len = 8
+        self.batch_size = 2
+
+        # Initialize the MultiHeadAttention module
+        self.mha = MultiHeadAttention(self.emb_dim, self.hidden_dim, self.n_heads)
+
+        # Sample inputs
+        self.hidden_state = torch.rand((self.batch_size, self.seq_len, self.emb_dim))
+        self.attention_mask = torch.tensor(
+            [[1, 1, 1, 0, 0, 0, 0, 0], [1, 1, 1, 1, 1, 0, 0, 0]], dtype=torch.float32
+        )  # Shape: (batch_size, seq_len)
+
+    def test_output_shape(self):
+        # Test that output has the correct shape
+        output = self.mha(self.hidden_state)
+        self.assertEqual(output.shape, (self.batch_size, self.seq_len, self.hidden_dim))
+
+    def test_num_params(self):
+        params = [_[0] for _ in self.mha.named_parameters()]
+
+        n_modules_per_head = 2 * 3  # (bias + weight) times (q, k, v)
+        n_dense_modules = 2  # (bias + weight)
+
+        self.assertEqual(
+            len(params), self.mha.n_heads * n_modules_per_head + n_dense_modules
+        )
