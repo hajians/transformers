@@ -2,11 +2,14 @@ import unittest
 
 import numpy as np
 import torch
+from parameterized import parameterized
 
 from transformers_tutorial.networks.attention_head import (
     AttentionHead,
     MultiHeadAttention,
 )
+
+TEST_TENSOR = torch.tensor([[1, 0, 0], [0, 1, 0], [4, 4, 4]]).unsqueeze(0).float()
 
 
 class TestAttentionHead(unittest.TestCase):
@@ -46,24 +49,49 @@ class TestAttentionHead(unittest.TestCase):
         sums = torch.sum(weights, dim=-1)
         self.assertTrue(torch.allclose(sums, torch.ones_like(sums), atol=1e-6))
 
-    def test_another_compute_weights(self):
+    @parameterized.expand(
+        [
+            (
+                "without_attention",
+                {
+                    "q": TEST_TENSOR,
+                    "v": TEST_TENSOR,
+                    "k": TEST_TENSOR,
+                    "attention_mask": None,
+                },
+                torch.softmax(
+                    torch.Tensor([[1, 0, 4], [0, 1, 4], [4, 4, 48]]) / np.sqrt(3),
+                    dim=-1,
+                ).unsqueeze(0),
+            ),
+            (
+                "with_attention",
+                {
+                    "q": TEST_TENSOR,
+                    "v": TEST_TENSOR,
+                    "k": TEST_TENSOR,
+                    "attention_mask": torch.tensor([[1, 1, 0]]),
+                },
+                torch.softmax(
+                    torch.Tensor([[1, 0, -1e5], [0, 1, -1e5], [-1e5, -1e5, 48]])
+                    / np.sqrt(3),
+                    dim=-1,
+                ).unsqueeze(0),
+            ),
+        ]
+    )
+    def test_another_compute_weights(self, name, input_, expected):
         # Given
-        k = q = torch.tensor([[1, 0, 0], [0, 1, 0], [4, 4, 4]]).unsqueeze(0).float()
-        v = torch.tensor([[1, 1, 1], [2, 2, 2], [-10, -10, -10]]).unsqueeze(0).float()
-        attention_mask = torch.tensor([[1, 1, 0]])
+        q, k, v = input_["q"], input_["k"], input_["v"]
+        attention_mask = input_["attention_mask"]
 
         # When
-        output = AttentionHead.compute_weights(q, k)
+        output = AttentionHead.compute_weights(q, k, attention_mask=attention_mask)
 
         # Then
         np.testing.assert_almost_equal(
             output.detach().numpy(),
-            torch.softmax(
-                torch.Tensor([[1, 0, 4], [0, 1, 4], [4, 4, 48]]) / np.sqrt(3), dim=-1
-            )
-            .unsqueeze(0)
-            .detach()
-            .numpy(),
+            expected.numpy(),
             decimal=4,
         )
 
