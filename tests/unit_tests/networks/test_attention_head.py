@@ -2,6 +2,7 @@ import unittest
 
 import numpy as np
 import torch
+from pandas.core.dtypes.inference import is_decimal
 from parameterized import parameterized
 
 from transformers_tutorial.networks.attention_head import (
@@ -18,7 +19,7 @@ class TestAttentionHead(unittest.TestCase):
         # Initialize an AttentionHead instance
         self.emb_dim = 4
         self.hiddin_dim = 4
-        self.attention_head = AttentionHead(self.emb_dim, self.hiddin_dim)
+        self.attention_head = AttentionHead(self.emb_dim, self.hiddin_dim, is_decoder=False)
 
         # Sample inputs
         self.batch_size = 2
@@ -132,7 +133,7 @@ class TestMultiHeadAttention(unittest.TestCase):
         self.batch_size = 2
 
         # Initialize the MultiHeadAttention module
-        self.mha = MultiHeadAttention(self.emb_dim, self.hidden_dim, self.n_heads)
+        self.mha = MultiHeadAttention(self.emb_dim, self.hidden_dim, self.n_heads, is_decoder=False)
 
         # Sample inputs
         self.hidden_state = torch.rand((self.batch_size, self.seq_len, self.emb_dim))
