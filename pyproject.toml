@@ -14,6 +14,7 @@ numba = "~0.57.0"
 matplotlib = "^3.9.3"
 bertviz = "^1.4.0"
 torchvision = "^0.20.1"
+accelerate = "0.26.0"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.3.2"
